@@ -133,6 +133,7 @@ abstract class BaseReadAloudService : BaseService(),
     var paragraphStartPos = 0
     var readAloudByPage = false
         private set
+    private var waitNewReadAloud = true
 
     private val broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -269,6 +270,7 @@ abstract class BaseReadAloudService : BaseService(),
                 }
             }
             paragraphStartPos = pos
+            waitNewReadAloud = false
             launch(Main) {
                 if (play) play() else pageChanged = true
             }
@@ -314,6 +316,10 @@ abstract class BaseReadAloudService : BaseService(),
     @SuppressLint("WakelockTimeout")
     @CallSuper
     open fun resumeReadAloud() {
+        resumeReadAloudInternal()
+    }
+
+    private fun resumeReadAloudInternal() {
         pause = false
         needResumeOnAudioFocusGain = false
         needResumeOnCallStateIdle = false
@@ -329,6 +335,9 @@ abstract class BaseReadAloudService : BaseService(),
     }
 
     private fun prevP() {
+        if (waitNewReadAloud) {
+            return
+        }
         if (nowSpeak > 0) {
             playStop()
             do {
@@ -350,11 +359,15 @@ abstract class BaseReadAloudService : BaseService(),
             play()
         } else {
             toLast = true
+            waitNewReadAloud = true
             ReadBook.moveToPrevChapter(true)
         }
     }
 
     private fun nextP() {
+        if (waitNewReadAloud) {
+            return
+        }
         if (nowSpeak < contentList.size - 1) {
             playStop()
             readAloudNumber += contentList[nowSpeak].length.plus(1) - paragraphStartPos
@@ -375,6 +388,7 @@ abstract class BaseReadAloudService : BaseService(),
             upTtsProgress(readAloudNumber + 1)
             play()
         } else {
+            waitNewReadAloud = true
             nextChapter()
         }
     }
@@ -682,8 +696,8 @@ abstract class BaseReadAloudService : BaseService(),
 
     open fun prevChapter() {
         toLast = false
+        resumeReadAloudInternal()
         ReadBook.moveToPrevChapter(true, toLast = false)
-        play()
     }
 
     open fun nextChapter() {
@@ -695,7 +709,7 @@ abstract class BaseReadAloudService : BaseService(),
         manualNextChapter = false
         ReadBook.upReadTime()
         AppLog.putDebug("${ReadBook.curTextChapter?.chapter?.title} 朗读结束跳转下一章并朗读")
-        play()
+        resumeReadAloudInternal()
         if (!ReadBook.moveToNextChapter(true)) {
             stopSelf()
         }

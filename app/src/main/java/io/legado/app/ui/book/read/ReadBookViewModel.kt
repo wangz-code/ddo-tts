@@ -39,6 +39,7 @@ import io.legado.app.utils.mapParallelSafe
 import io.legado.app.utils.postEvent
 import io.legado.app.utils.toStringArray
 import io.legado.app.utils.toastOnUi
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
@@ -52,7 +53,6 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
-import kotlin.coroutines.coroutineContext
 
 /**
  * 阅读界面数据处理
@@ -92,7 +92,10 @@ class ReadBookViewModel(application: Application) : BaseViewModel(application) {
             } ?: ReadBook.book
             when {
                 book != null -> initBook(book)
-                else -> ReadBook.upMsg(context.getString(R.string.no_book))
+                else -> {
+                    ReadBook.upMsg(context.getString(R.string.no_book))
+                    AppLog.put("未找到书籍\nbookUrl:$bookUrl")
+                }
             }
         }.onSuccess {
             success?.invoke()
@@ -131,7 +134,7 @@ class ReadBookViewModel(application: Application) : BaseViewModel(application) {
         if (ReadBook.chapterChanged) {
             // 有章节跳转不同步阅读进度
             ReadBook.chapterChanged = false
-        } else if (!isSameBook || !BaseReadAloudService.isRun) {
+        } else if (!(isSameBook && BaseReadAloudService.isRun) && ReadBook.inBookshelf) {
             if (AppConfig.syncBookProgressPlus) {
                 ReadBook.syncProgress({ progress -> ReadBook.callBack?.sureNewProgress(progress) })
             } else {
@@ -166,7 +169,7 @@ class ReadBookViewModel(application: Application) : BaseViewModel(application) {
             WebBook.getBookInfoAwait(source, book, canReName = false)
             return true
         } catch (e: Throwable) {
-            coroutineContext.ensureActive()
+            currentCoroutineContext().ensureActive()
             ReadBook.upMsg("详情页出错: ${e.localizedMessage}")
             return false
         }
@@ -222,7 +225,7 @@ class ReadBookViewModel(application: Application) : BaseViewModel(application) {
                         ReadBook.onChapterListUpdated(book)
                         return true
                     }.onFailure {
-                        coroutineContext.ensureActive()
+                        currentCoroutineContext().ensureActive()
                         ReadBook.upMsg(context.getString(R.string.error_load_toc))
                         return false
                     }
@@ -245,6 +248,9 @@ class ReadBookViewModel(application: Application) : BaseViewModel(application) {
             AppLog.put("拉取阅读进度失败《${book.name}》\n${it.localizedMessage}", it)
         }.onSuccess { progress ->
             progress ?: return@onSuccess
+            if (progress.durChapterIndex == book.durChapterIndex && progress.durChapterPos == book.durChapterPos) {
+                return@onSuccess
+            }
             if (progress.durChapterIndex < book.durChapterIndex ||
                 (progress.durChapterIndex == book.durChapterIndex
                         && progress.durChapterPos < book.durChapterPos)
@@ -253,6 +259,7 @@ class ReadBookViewModel(application: Application) : BaseViewModel(application) {
             } else if (progress.durChapterIndex < book.simulatedTotalChapterNum()) {
                 ReadBook.setProgress(progress)
                 AppLog.put("自动同步阅读进度成功《${book.name}》 ${progress.durChapterTitle}")
+                context.toastOnUi("已同步最新阅读进度")
             }
         }
     }

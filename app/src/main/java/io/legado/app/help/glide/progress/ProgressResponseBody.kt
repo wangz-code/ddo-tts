@@ -4,11 +4,18 @@ import android.os.Handler
 import android.os.Looper
 import okhttp3.MediaType
 import okhttp3.ResponseBody
-import okio.*
+import okio.Buffer
+import okio.BufferedSource
+import okio.ForwardingSource
+import okio.Source
+import okio.buffer
 import java.io.IOException
-import kotlin.jvm.Throws
 
-class ProgressResponseBody internal constructor(private val url: String, private val internalProgressListener: InternalProgressListener?, private val responseBody: ResponseBody) : ResponseBody() {
+class ProgressResponseBody internal constructor(
+    private val url: String,
+    private val internalProgressListener: InternalProgressListener,
+    private val responseBody: ResponseBody
+) : ResponseBody() {
     private var bufferedSource: BufferedSource? = null
     override fun contentType(): MediaType? {
         return responseBody.contentType()
@@ -34,9 +41,13 @@ class ProgressResponseBody internal constructor(private val url: String, private
             override fun read(sink: Buffer, byteCount: Long): Long {
                 val bytesRead = super.read(sink, byteCount)
                 totalBytesRead += if (bytesRead == -1L) 0 else bytesRead
-                if (internalProgressListener != null && lastTotalBytesRead != totalBytesRead) {
+                if (lastTotalBytesRead != totalBytesRead || bytesRead == -1L) {
                     lastTotalBytesRead = totalBytesRead
-                    mainThreadHandler.post { internalProgressListener.onProgress(url, totalBytesRead, contentLength()) }
+                    mainThreadHandler.post {
+                        internalProgressListener.onProgress(
+                            url, totalBytesRead, contentLength(), bytesRead == -1L
+                        )
+                    }
                 }
                 return bytesRead
             }
@@ -44,7 +55,7 @@ class ProgressResponseBody internal constructor(private val url: String, private
     }
 
     interface InternalProgressListener {
-        fun onProgress(url: String, bytesRead: Long, totalBytes: Long)
+        fun onProgress(url: String, bytesRead: Long, totalBytes: Long, isComplete: Boolean)
     }
 
     companion object {

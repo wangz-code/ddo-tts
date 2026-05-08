@@ -52,12 +52,12 @@ export default {
         type: 'String',
         hint: '自定义登录界面',
       },
-      {
-        title: '登录检测',
-        id: 'loginCheckJs',
-        type: 'String',
-        hint: '登录检测js',
-      },
+      // {
+      //   title: '登录检测',
+      //   id: 'loginCheckJs',
+      //   type: 'String',
+      //   hint: '登录检测js',
+      // },
       {
         title: '封面解密',
         id: 'coverDecodeJs',

@@ -10,7 +10,7 @@ Legado is a free and open source novel reader for Android.
 ## legado-tts/阅读内置EdgeTTS 微软大声朗读
 - app基于legado https://github.com/gedoor/legado ✅
 - Edgetts基于rany2/edge-tts https://github.com/rany2/edge-tts ✅
-- 豆包tts基于 https://github.com/callmerio/doubao-tts  ✅( 有格局但不多)
+- 豆包tts基于 https://github.com/callmerio/doubao-tts  ✅( 豆包格局不多)
 
 ### 豆包TTS 测试
 - 2025-01-01新增豆包TTS,  需要先添加 cookie 首次请求比较慢耐心等待, 其次不支持调语速,避免请求频繁拦截, 朗读的进度和语音可能有错位
@@ -29,10 +29,10 @@ Legado is a free and open source novel reader for Android.
 
 ### 为什么会有这个仓库? 
 - 我曾经提交过PR挂了几个星期也没人合并, So waht ever! 我=null, 我+GPT=无所不能
-- 自己确实有这个需求,晚上不听几章睡不着 装了阅读再安装TTS有些多余,现有的TTS核心仍是rany2/edge-tts
+- 自己有这个需求,晚上不听几章睡不着 装了阅读再安装TTS有些多余,现有所谓TTS引擎本质上仍是rany2/edge-tts
 
 ### 书源
-- 要么去喵公子导入, 要么本地, 不喜欢书源搜出来都是一堆垃圾, 除非本地实在找不到才会用
+- 要么去喵公子导入, 要么本地
 - 本地电子书推荐: https://github.com/BlankRain/ebooks
 
 ### 主要修改
@@ -40,7 +40,7 @@ Legado is a free and open source novel reader for Android.
 - 原作者来是把音频缓存硬盘上会频繁执行写入和删除(有多少段落就写多少次),
 - 频繁执行写入影响寿命或许对于现代存储来说影响微乎其微😋 但是我改成了放在内存中, 每读完一章就释放已读完的的媒体, 修改内容参见PR:gedoor/legado#5304
 - 跟随rany2/edge-tts EdgeVersion 143.0.3650.75
-- 不定时合并(gedoor/legado)主仓更新最近一次是在 2025-12-08
+- 不定时合并(gedoor/legado)主仓更新最近一次是在 2026-05-08
 ![detail.png](https://raw.githubusercontent.com/WangSunio/img/main/images/pre.png)
 
 ### happy every day 😄 😄

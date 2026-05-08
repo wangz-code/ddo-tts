@@ -2,7 +2,6 @@ package io.legado.app.ui.book.read.config
 
 import android.annotation.SuppressLint
 import android.content.DialogInterface
-import android.graphics.Color
 import android.graphics.PorterDuff
 import android.net.Uri
 import android.os.Bundle
@@ -12,8 +11,8 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.SeekBar
 import androidx.appcompat.widget.TooltipCompat
+import androidx.core.graphics.toColorInt
 import androidx.core.view.isGone
-import androidx.documentfile.provider.DocumentFile
 import com.jaredrummler.android.colorpicker.ColorPickerDialog
 import io.legado.app.R
 import io.legado.app.base.BaseDialogFragment
@@ -42,16 +41,16 @@ import io.legado.app.utils.FileDoc
 import io.legado.app.utils.FileUtils
 import io.legado.app.utils.GSON
 import io.legado.app.utils.MD5Utils
-import io.legado.app.utils.SelectImageContract
 import io.legado.app.utils.compress.ZipUtils
+import io.legado.app.utils.createFileIfNotExist
 import io.legado.app.utils.createFileReplace
 import io.legado.app.utils.createFolderReplace
+import io.legado.app.utils.delete
 import io.legado.app.utils.externalCache
 import io.legado.app.utils.externalFiles
+import io.legado.app.utils.find
 import io.legado.app.utils.getFile
 import io.legado.app.utils.inputStream
-import io.legado.app.utils.isContentScheme
-import io.legado.app.utils.launch
 import io.legado.app.utils.longToast
 import io.legado.app.utils.openInputStream
 import io.legado.app.utils.openOutputStream
@@ -80,7 +79,7 @@ class BgTextConfigDialog : BaseDialogFragment(R.layout.dialog_read_bg_text) {
     private var primaryTextColor = 0
     private var secondaryTextColor = 0
     private val importFormNet = "网络导入"
-    private val selectBgImage = registerForActivityResult(SelectImageContract()) {
+    private val selectBgImage = registerForActivityResult(HandleFileContract()) {
         it.uri?.let { uri ->
             setBgFromUri(uri)
         }
@@ -92,7 +91,7 @@ class BgTextConfigDialog : BaseDialogFragment(R.layout.dialog_read_bg_text) {
     }
     private val selectImportDoc = registerForActivityResult(HandleFileContract()) {
         it.uri?.let { uri ->
-            if (uri.toString() == importFormNet) {
+            if (uri.path == "/$importFormNet") {
                 importNetConfigAlert()
             } else {
                 importConfig(uri)
@@ -153,7 +152,9 @@ class BgTextConfigDialog : BaseDialogFragment(R.layout.dialog_read_bg_text) {
                 ivBg.setImageResource(R.drawable.ic_image)
                 ivBg.setColorFilter(primaryTextColor, PorterDuff.Mode.SRC_IN)
                 root.setOnClickListener {
-                    selectBgImage.launch()
+                    selectBgImage.launch {
+                        mode = HandleFileContract.IMAGE
+                    }
                 }
             }
         }
@@ -217,8 +218,8 @@ class BgTextConfigDialog : BaseDialogFragment(R.layout.dialog_read_bg_text) {
         }
         binding.tvBgColor.setOnClickListener {
             val bgColor =
-                if (curBgType() == 0) Color.parseColor(curBgStr())
-                else Color.parseColor("#015A86")
+                if (curBgType() == 0) curBgStr().toColorInt()
+                else "#015A86".toColorInt()
             ColorPickerDialog.newBuilder()
                 .setColor(bgColor)
                 .setShowAlphaSlider(false)
@@ -244,7 +245,7 @@ class BgTextConfigDialog : BaseDialogFragment(R.layout.dialog_read_bg_text) {
         }
         binding.ivDelete.setOnClickListener {
             if (ReadBookConfig.deleteDur()) {
-                postEvent(EventBus.UP_CONFIG, arrayListOf(1, 2, 5))
+                postEvent(EventBus.UP_CONFIG, arrayListOf(1, 2, 12, 5))
                 dismissAllowingStateLoss()
             } else {
                 toastOnUi("数量已是最少,不能删除.")
@@ -274,8 +275,7 @@ class BgTextConfigDialog : BaseDialogFragment(R.layout.dialog_read_bg_text) {
             configDir.createFolderReplace()
             val configFile = configDir.getFile("readConfig.json")
             configFile.createFileReplace()
-            configFile.writeText(GSON.toJson(ReadBookConfig.getExportConfig()))
-            exportFiles.add(configFile)
+            val config = ReadBookConfig.getExportConfig()
             val fontPath = ReadBookConfig.textFont
             if (fontPath.isNotEmpty()) {
                 val fontDoc = FileDoc.fromFile(fontPath)
@@ -286,9 +286,12 @@ class BgTextConfigDialog : BaseDialogFragment(R.layout.dialog_read_bg_text) {
                     fontExportFile.outputStream().use { out ->
                         it.copyTo(out)
                     }
+                    config.textFont = fontName
                     exportFiles.add(fontExportFile)
                 }
             }
+            configFile.writeText(GSON.toJson(config))
+            exportFiles.add(configFile)
             repeat(3) {
                 val path = ReadBookConfig.durConfig.getBgPath(it) ?: return@repeat
                 val bgExportFile = copyBgImage(path, configDir) ?: return@repeat
@@ -296,20 +299,13 @@ class BgTextConfigDialog : BaseDialogFragment(R.layout.dialog_read_bg_text) {
             }
             val configZipPath = FileUtils.getPath(requireContext().externalCache, configFileName)
             if (ZipUtils.zipFiles(exportFiles, File(configZipPath))) {
-                if (uri.isContentScheme()) {
-                    DocumentFile.fromTreeUri(requireContext(), uri)?.let { treeDoc ->
-                        treeDoc.findFile(exportFileName)?.delete()
-                        val out = treeDoc.createFile("", exportFileName)?.openOutputStream()
-                        out?.use {
-                            File(configZipPath).inputStream().use {
-                                it.copyTo(out)
-                            }
-                        }
+                val exportDir = FileDoc.fromDir(uri)
+                exportDir.find(exportFileName)?.delete()
+                val exportFileDoc = exportDir.createFileIfNotExist(exportFileName)
+                exportFileDoc.openOutputStream().getOrThrow().use { out ->
+                    File(configZipPath).inputStream().use {
+                        it.copyTo(out)
                     }
-                } else {
-                    val exportPath = FileUtils.getPath(File(uri.path!!), exportFileName)
-                    FileUtils.delete(exportPath)
-                    File(configZipPath).copyTo(FileUtils.createFileIfNotExist(exportPath))
                 }
             }
         }.onSuccess {

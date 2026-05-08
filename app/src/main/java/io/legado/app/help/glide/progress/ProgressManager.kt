@@ -11,13 +11,17 @@ object ProgressManager {
     private val listenersMap = ConcurrentHashMap<String, OnProgressListener>()
 
     val LISTENER = object : ProgressResponseBody.InternalProgressListener {
-        override fun onProgress(url: String, bytesRead: Long, totalBytes: Long) {
+        override fun onProgress(
+            url: String,
+            bytesRead: Long,
+            totalBytes: Long,
+            isComplete: Boolean
+        ) {
             getProgressListener(url)?.let {
-                var percentage = (bytesRead * 1f / totalBytes * 100f).toInt()
-                var isComplete = percentage >= 100
-                if (percentage <= -100) {
-                    percentage = 0
-                    isComplete = true
+                val percentage = when {
+                    isComplete -> 100
+                    totalBytes == -1L -> 0
+                    else -> (bytesRead * 1f / totalBytes * 100f).toInt().coerceIn(0, 100)
                 }
                 it.invoke(isComplete, percentage, bytesRead, totalBytes)
                 if (isComplete) {
@@ -31,7 +35,7 @@ object ProgressManager {
         if (url.isNotEmpty()) {
             val url = getUrlNoOption(url)
             listenersMap[url] = listener
-            listener.invoke(false, 1, 0, 0)
+            listener.invoke(false, 0, 0, 0)
         }
     }
 

@@ -380,6 +380,7 @@ object ReadManga : CoroutineScope by MainScope() {
         if (book?.isLocal == true) return
         executor.execute {
             if (AppConfig.preDownloadNum < 2) {
+                upToc()
                 return@execute
             }
             preDownloadTask?.cancel()
@@ -463,17 +464,22 @@ object ReadManga : CoroutineScope by MainScope() {
         val bookSource = bookSource ?: return
         val book = book ?: return
         if (!book.canUpdate) return
+        if (chapterSize - durChapterIndex - 1 >= 3) return
         if (System.currentTimeMillis() - book.lastCheckTime < 600000) return
         book.lastCheckTime = System.currentTimeMillis()
+        val oldBook = book.copy()
         WebBook.getChapterList(this, bookSource, book).onSuccess(IO) { cList ->
-            if (book.bookUrl == ReadManga.book?.bookUrl
-                && cList.size > chapterSize
-            ) {
-                appDb.bookChapterDao.delByBook(book.bookUrl)
+            ensureActive()
+            if (cList.size > chapterSize) {
+                if (oldBook.bookUrl == book.bookUrl) {
+                    appDb.bookDao.update(book)
+                } else {
+                    appDb.bookDao.replace(oldBook, book)
+                    BookHelp.updateCacheFolder(oldBook, book)
+                }
+                appDb.bookChapterDao.delByBook(oldBook.bookUrl)
                 appDb.bookChapterDao.insert(*cList.toTypedArray())
-                saveRead()
-                chapterSize = cList.size
-                simulatedChapterSize = book.simulatedTotalChapterNum()
+                onChapterListUpdated(book, false)
                 nextMangaChapter ?: loadContent(durChapterIndex + 1)
             }
         }
@@ -549,7 +555,11 @@ object ReadManga : CoroutineScope by MainScope() {
         mCallback?.showLoading()
     }
 
-    fun onChapterListUpdated(newBook: Book) {
+    fun loadFail(msg: String, retry: Boolean = true) {
+        mCallback?.loadFail(msg, retry)
+    }
+
+    fun onChapterListUpdated(newBook: Book, loadContent: Boolean = true) {
         if (newBook.isSameNameAuthor(book)) {
             book = newBook
             chapterSize = newBook.totalChapterNum
@@ -559,7 +569,7 @@ object ReadManga : CoroutineScope by MainScope() {
             }
             if (mCallback == null) {
                 clearMangaChapter()
-            } else {
+            } else if (loadContent) {
                 loadContent()
             }
         }
@@ -622,7 +632,7 @@ object ReadManga : CoroutineScope by MainScope() {
 
     interface Callback {
         fun upContent()
-        fun loadFail(msg: String)
+        fun loadFail(msg: String, retry: Boolean = true)
         fun sureNewProgress(progress: BookProgress)
         fun showLoading()
         fun startLoad()
