@@ -178,7 +178,7 @@ interface BookSourceDao {
     )
     fun getEnabledByType(type: Int): List<BookSource>
 
-    @Query("select * from book_sources where enabled = 1 and bookSourceUrl = :baseUrl")
+    @Query("select * from book_sources where enabled = 1 and  TRIM(bookSourceUrl, '/') = TRIM(:baseUrl, '/')")
     fun getBookSourceAddBook(baseUrl: String): BookSource?
 
     @get:Query(
