@@ -32,7 +32,6 @@ Legado is a free and open source novel reader for Android.
 - 自己有这个需求,晚上不听几章睡不着 装了阅读再安装TTS有些多余,现有所谓TTS引擎本质上仍是rany2/edge-tts
 
 ### 书源
-- 要么去喵公子导入, 要么本地
 - 本地电子书推荐: https://github.com/BlankRain/ebooks
 
 ### 主要修改
