@@ -3,7 +3,9 @@
 
 ## ddo-tts/内置EdgeTTS 微软大声朗读
 - Edgetts基于rany2/edge-tts https://github.com/rany2/edge-tts ✅
-
+- 小米MIMO语音合成 https://mimo.mi.com/models/zh-CN/mimo-v2.5-tts-voiceclone
+- 如果是mimo新用户注册可以填写我的邀请码: Y2QCPB
+  
 ### 为什么会有这个仓库? 
 - 我曾经提交过PR挂了几个星期也没人合并, So waht ever! 我=null, 我+GPT=无所不能
 - 自己有这个需求,晚上不听几章睡不着 再安装TTS有些多余,现有所谓TTS引擎本质上仍是rany2/edge-tts
