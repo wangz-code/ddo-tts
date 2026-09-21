@@ -3,20 +3,13 @@ package io.legado.app.service
 import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Context
-import android.net.Uri
 import android.util.Log
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
-import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
-import androidx.media3.common.util.Assertions
-import androidx.media3.common.util.UnstableApi
-import androidx.media3.datasource.DataSource
-import androidx.media3.datasource.DataSpec
-import androidx.media3.datasource.TransferListener
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import io.legado.app.R
@@ -39,10 +32,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
-import java.io.IOException
 import java.io.InputStream
 import java.util.Timer
-import kotlin.collections.set
 import kotlin.concurrent.schedule
 import kotlin.coroutines.coroutineContext
 
