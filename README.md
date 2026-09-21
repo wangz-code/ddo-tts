@@ -18,8 +18,11 @@
 - 跟随rany2/edge-tts EdgeVersion 143.0.3650.75
 
 ~~不定时合并主仓更新最近一次是在 2026-05-08。~~ 主仓已经删库跑路了, 估计是进去了在座的各位都有责任, 进去有吃有喝，踩缝纫机还有工资拿
+### happy every day 😄 😄 如果能帮到你,可以帮我买杯蜜雪柠檬水 谢谢!
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/WangSunio/img/main/images/read.jpg" width="400" />
+  &nbsp;&nbsp;
+  <img src="https://raw.githubusercontent.com/WangSunio/img/main/images/pay.jpg" width="400" />
+</p>
 
-![detail.png](https://raw.githubusercontent.com/WangSunio/img/main/images/pre.png)
-
-### happy every day 😄 😄
