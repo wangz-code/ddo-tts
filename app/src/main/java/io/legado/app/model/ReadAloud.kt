@@ -14,6 +14,7 @@ import io.legado.app.service.HttpReadAloudService
 import io.legado.app.service.TTSDouBaoAloudService
 import io.legado.app.service.TTSReadAloudService
 import io.legado.app.service.TTSEdgeAloudService
+import io.legado.app.service.TTSMiMoAloudService
 import io.legado.app.utils.LogUtils
 import io.legado.app.utils.StringUtils
 import io.legado.app.utils.postEvent
@@ -33,6 +34,9 @@ object ReadAloud {
         }
         if (ttsEngine.contains("edgeinner")) {
             return TTSEdgeAloudService::class.java
+        }
+        if (ttsEngine.contains("mimotts")) {
+            return TTSMiMoAloudService::class.java
         }
         if (ttsEngine.contains("doubao")) {
             return  TTSDouBaoAloudService::class.java

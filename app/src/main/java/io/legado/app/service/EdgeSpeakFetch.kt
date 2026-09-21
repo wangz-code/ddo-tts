@@ -40,6 +40,7 @@ class EdgeSpeakFetch {
         private const val CHROMIUM_FULL_VERSION = "143.0.3650.75"
         private var CHROMIUM_MAJOR_VERSION: String = CHROMIUM_FULL_VERSION.split(".", limit = 2)[0]
         private const val SEC_MS_GEC_VERSION: String = "1-$CHROMIUM_FULL_VERSION"
+
         // 基础请求头（对应Python的BASE_HEADERS）
         val BASE_HEADERS = mapOf(
             "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${CHROMIUM_MAJOR_VERSION}.0.0.0 Safari/537.36 Edg/${CHROMIUM_MAJOR_VERSION}.0.0.0",
@@ -54,7 +55,10 @@ class EdgeSpeakFetch {
             "Origin" to "chrome-extension://jdiccldimpdaibmpdkjnbmckianbfold",
             "Sec-WebSocket-Version" to "13",
 
-        )
+            )
+
+        // 避免单个章节太长导致wss 长时间连接
+        var count = 0;
 
         fun generateSecMsGec(clockSkewSeconds: Double): String {
             val now = Instant.now().epochSecond + clockSkewSeconds
@@ -115,7 +119,6 @@ class EdgeSpeakFetch {
                 e.printStackTrace()
             }
         }
-        Log.i(TAG, "重新生成 WebsocketConnect")
         val clockSkewSeconds = 0.0
         val secMsGec = generateSecMsGec(clockSkewSeconds)
         val connectionId = connectID()
@@ -251,14 +254,15 @@ class EdgeSpeakFetch {
             val timeDiff = currentTime - lastTime
             // 判断是否超过毫秒
             val ssml = mkSSML(speakTextStr, voice, processRate(rate))
-
-            if (timeDiff < 500 && !isReconnect) {
-                Log.i(TAG, "复用使用上次lastWss")
+            if (timeDiff < 500 && !isReconnect && count <= 20) {
+                Log.i(TAG, "复用上次Wss_count=" + count)
                 wss = lastWss
+                count += 1;
                 sendSSMLMessage(wss, ssml)
             } else {
+                Log.i(TAG, "重新生成Wss_count=" + count)
+                count = 0;
                 getWssConnect(ssml)
-                Log.i(TAG, "重新生成websocket, sendSpeechConfig")
             }
         } catch (e: Exception) {
             Log.i(TAG, "sendSSMLMessage:$e")

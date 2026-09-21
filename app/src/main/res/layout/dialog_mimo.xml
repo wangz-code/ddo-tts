@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ApiKey："
+        android:textSize="15sp"
+        android:textColor="#333333"
+        android:layout_marginBottom="6dp" />
+    <EditText
+        android:id="@+id/et_mimokey"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="输入API Key貌似是 sk-xxxx"
+        android:inputType="text"
+        android:maxLines="1" />
+    <!-- 音色选择 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="预制音色："
+        android:textSize="15sp"
+        android:textColor="#333333"
+        android:layout_marginBottom="6dp" />
+
+    <Spinner
+        android:id="@+id/spinner_voice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:spinnerMode="dropdown"
+        android:layout_marginBottom="16dp" />
+
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="自定义嗓音："
+        android:textSize="15sp"
+        android:textColor="#333333"
+        android:layout_marginBottom="6dp" />
+
+    <EditText
+        android:id="@+id/et_voice_style"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="请输入嗓音样式"
+        android:inputType="text"
+        android:maxLines="1" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="eg撒娇少女: 夹子音，软糯甜腻，尾音故意拉长上扬，带点委屈和依赖感"
+        android:textSize="15sp"
+        android:textColor="#333333"
+        android:layout_marginBottom="6dp" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="eg 东北老铁: 东北话，豪爽直接，大嗓门，语气热情奔放，自带喜感,"
+        android:textSize="15sp"
+        android:textColor="#333333"
+        android:layout_marginBottom="6dp" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="eg 一位年迈的老先生，说带北方口音的普通话，语速缓慢而沉稳，嗓音略带沙哑和沧桑感"
+        android:textSize="15sp"
+        android:textColor="#333333"
+        android:layout_marginBottom="6dp" />
+
+</LinearLayout>

@@ -3,6 +3,7 @@ package io.legado.app.ui.book.read.config
 import android.app.AlertDialog
 import android.content.Context
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
@@ -163,6 +164,7 @@ class SpeakEngineDialog() : BaseDialogFragment(R.layout.dialog_recycler_view),
                 }
                 // 你的点击事件逻辑
                 ivEdit.setOnClickListener {
+
                     val cacheKey = "tts_edge_voice"
                     val cacheValue = getSharedPrefValue(context, cacheKey, "")
                     var voiceOptions = listOf(
@@ -220,6 +222,100 @@ class SpeakEngineDialog() : BaseDialogFragment(R.layout.dialog_recycler_view),
                         }
                         .setCancelable(true)
                         .show()
+                }
+            }
+
+        }
+        adapter.addHeaderView {
+            ItemHttpTtsBinding.inflate(layoutInflater, recyclerView, false).apply {
+                sysTtsViews.add(cbName)
+                ivEdit.visible()
+                ivMenuDelete.gone()
+                labelSys.gone()
+                cbName.text = "小米MiMoTTS"
+                cbName.tag = "mimotts"
+                cbName.isChecked = GSON.fromJsonObject<SelectItem<String>>(ttsEngine)
+                    .getOrNull()?.value == cbName.tag
+                cbName.setOnClickListener {
+                    upTts(GSON.toJson(SelectItem("小米MiMoTTS", "mimotts")))
+                }
+                // 你的点击事件逻辑
+                ivEdit.setOnClickListener {
+                    val cacheKey = "mimotts_config"
+                    val cacheValue = getSharedPrefValue(context, cacheKey, "")
+                    var voiceOptions = listOf(
+                        "自定义",
+                        "冰糖",
+                        "茉莉",
+                        "苏打打",
+                        "白桦",
+                        "Mia",
+                        "Chloe",
+                        "Milo",
+                        "Dean"
+                    )
+
+                    val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_mimo, null)
+                    val spinnerVoice = dialogView.findViewById<Spinner>(R.id.spinner_voice)
+                    val voiceStyle = dialogView.findViewById<EditText>(R.id.et_voice_style)
+                    val mimoAPiKey = dialogView.findViewById<EditText>(R.id.et_mimokey)
+
+
+                    // 1. 设置 Spinner
+                    val adapter = ArrayAdapter(
+                        requireContext(),
+                        android.R.layout.simple_spinner_item,
+                        voiceOptions
+                    ).apply {
+                        setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    }
+                    spinnerVoice.adapter = adapter
+                    // 3. 选中缓存的选项（如果缓存值在列表中）
+
+                    var config = cacheValue.split("@")
+
+                    var cacheApiKey = config[0]?:""
+                    var cacheVoice = config[1]?:""
+                    var cacheStyle = config[2]?:""
+                    mimoAPiKey.setText(cacheApiKey)
+                    voiceStyle.setText(cacheStyle)
+                    val cacheIndex = voiceOptions.indexOf(cacheVoice)
+                    if (cacheIndex >= 0) {
+                        spinnerVoice.setSelection(cacheIndex)
+                    }else{
+                        spinnerVoice.setSelection(0)
+                    }
+                    if (cacheStyle.isEmpty()) {
+                        voiceStyle.setText("撒娇少女， 夹子音，软糯甜腻，尾音故意拉长上扬，带点委屈和依赖感")
+                    }
+
+                    // 4. 构建弹窗并显示
+                    var dialog = AlertDialog.Builder(context)
+                        .setTitle("MiMo TTS")
+                        .setMessage("预制音色和自定义嗓音二选一,如果需要[自定义嗓音] 预制音色必须选择[自定义],嗓音胡诌也行,如有需要自行探索mimotts")
+                        .setView(dialogView)
+                        .setPositiveButton("保存", null)      // 先传 null，自己设置点击事件
+                        .setNegativeButton("取消", null)
+                        .create()
+
+                    dialog.setOnShowListener {
+                        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                            // 获取选中的选项并保存到缓存
+                            val apiKey = mimoAPiKey.text.toString()
+                            val style = voiceStyle.text.toString()
+                            val voice = spinnerVoice.selectedItem.toString()?:""
+
+                            if (apiKey.isEmpty()){
+                                Toast.makeText(context, "还没输入ApiKey,没有就去申请一个限时免费", Toast.LENGTH_SHORT).show()
+                                return@setOnClickListener
+                            }
+                            var selectedValue = apiKey+"@"+voice+"@"+style
+                            saveToSharedPref(context, cacheKey, selectedValue)
+                            Toast.makeText(context, "已选择：${selectedValue.take(20)}...", Toast.LENGTH_SHORT).show()
+                            dialog.dismiss()
+                        }
+                    }
+                    dialog.show()
                 }
             }
 
