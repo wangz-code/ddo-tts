@@ -242,7 +242,7 @@ class SpeakEngineDialog() : BaseDialogFragment(R.layout.dialog_recycler_view),
                 // 你的点击事件逻辑
                 ivEdit.setOnClickListener {
                     val cacheKey = "mimotts_config"
-                    val cacheValue = getSharedPrefValue(context, cacheKey, "")
+                    val cacheValue = getSharedPrefValue(context, cacheKey, "@@")
                     var voiceOptions = listOf(
                         "自定义",
                         "冰糖",
@@ -273,6 +273,8 @@ class SpeakEngineDialog() : BaseDialogFragment(R.layout.dialog_recycler_view),
                     // 3. 选中缓存的选项（如果缓存值在列表中）
 
                     var config = cacheValue.split("@")
+
+                    println("config" + config.size)
 
                     var cacheApiKey = config[0]?:""
                     var cacheVoice = config[1]?:""
