@@ -23,6 +23,6 @@
 <p align="center">
   <img src="https://raw.githubusercontent.com/WangSunio/img/main/images/read.jpg" width="400" />
   &nbsp;&nbsp;
-  <img src="https://raw.githubusercontent.com/WangSunio/img/main/images/pay.jpg" width="400" />
+
 </p>
 
