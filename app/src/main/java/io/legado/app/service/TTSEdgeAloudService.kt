@@ -201,6 +201,7 @@ class TTSEdgeAloudService : BaseReadAloudService(), Player.Listener {
         try {
             return withContext(Dispatchers.IO) {
                 val voice = getVoiceValue()
+//                Log.i("TOKEN", EdgeSpeakFetch.generateSecMsGecV2(1791888000.0))
                 val inputStream = edgeSpeakFetch.synthesizeText(speakText, speechRate,voice)
                 cacheAudio(fileName, inputStream)
                 "success"
