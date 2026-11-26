@@ -3,7 +3,7 @@
 
 ## ddo-tts/内置EdgeTTS 微软大声朗读
 - Edgetts基于rany2/edge-tts https://github.com/rany2/edge-tts ✅
-- 小米MIMO语音合成 https://mimo.mi.com/models/zh-CN/mimo-v2.5-tts-voiceclone
+- 小米MIMO语音合成 https://mimo.mi.com/models/zh-CN/mimo-v2.5-tts-voiceclone (限时免费)
 - 如果是mimo新用户注册可以填写我的邀请码: Y2QCPB
   
 ### 为什么会有这个仓库? 
