@@ -70,18 +70,20 @@ class TTSMiMoAloudService : BaseReadAloudService(), Player.Listener {
     data class MiMoConfig(
         val apiKey: String = "",
         val voice: String = "Chloe",
-        val style: String = "自然、口语化的对话语调"
+        val style: String = "自然、口语化的对话语调",
+        val label: String = "",
     )
 
     // 核心方法2：从SharedPreferences读取数据
-    private fun getConfigValue(defaultValue: String = ""): MiMoConfig {
+    private fun getConfigValue(defaultValue: String = "@@@@@"): MiMoConfig {
         val sp = ctx.getSharedPreferences("TTS_CONFIG", MODE_PRIVATE)
-        val configValue = sp.getString("mimotts_config", defaultValue) ?: defaultValue // 防止null
-        var config = configValue.split("@")
+        val configValue = sp.getString("mimotts_config", defaultValue) ?: defaultValue
+        val config = configValue.split("@")
         return MiMoConfig(
-            config[0],
-            config[1],
-            config[2]
+            config.getOrElse(0) { "" },
+            config.getOrElse(1) { "" },
+            config.getOrElse(2) { "" },
+            config.getOrElse(3) { "" }
         )
     }
 
@@ -206,9 +208,12 @@ class TTSMiMoAloudService : BaseReadAloudService(), Player.Listener {
                 val apiKey = config.apiKey
                 val voice = config.voice
                 val style = config.style
-
+                var fullText = speakText
+                if (config.label.isNotEmpty()) {
+                    fullText = "("+config.label+")"+ speakText
+                }
                 val inputStream =
-                    mimoFetch.synthesizeText(speakText, speechRate, voice, style, apiKey)
+                    mimoFetch.synthesizeText(fullText, speechRate, voice, style, apiKey)
                 cacheAudio(fileName, inputStream)
                 "success"
             }

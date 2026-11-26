@@ -242,7 +242,7 @@ class SpeakEngineDialog() : BaseDialogFragment(R.layout.dialog_recycler_view),
                 // 你的点击事件逻辑
                 ivEdit.setOnClickListener {
                     val cacheKey = "mimotts_config"
-                    val cacheValue = getSharedPrefValue(context, cacheKey, "@@")
+                    val cacheValue = getSharedPrefValue(context, cacheKey, "@@@@")
                     var voiceOptions = listOf(
                         "自定义",
                         "冰糖",
@@ -258,6 +258,7 @@ class SpeakEngineDialog() : BaseDialogFragment(R.layout.dialog_recycler_view),
                     val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_mimo, null)
                     val spinnerVoice = dialogView.findViewById<Spinner>(R.id.spinner_voice)
                     val voiceStyle = dialogView.findViewById<EditText>(R.id.et_voice_style)
+                    val voiceLabel = dialogView.findViewById<EditText>(R.id.et_voice_label)
                     val mimoAPiKey = dialogView.findViewById<EditText>(R.id.et_mimokey)
 
 
@@ -276,11 +277,13 @@ class SpeakEngineDialog() : BaseDialogFragment(R.layout.dialog_recycler_view),
 
                     println("config" + config.size)
 
-                    var cacheApiKey = config[0]?:""
-                    var cacheVoice = config[1]?:""
-                    var cacheStyle = config[2]?:""
+                    var cacheApiKey = config.getOrElse(0) { "" }
+                    var cacheVoice = config.getOrElse(1) { "" }
+                    var cacheStyle = config.getOrElse(2) { "" }
+                    val cacheLabel = config.getOrElse(3) { "" }
                     mimoAPiKey.setText(cacheApiKey)
                     voiceStyle.setText(cacheStyle)
+                    voiceLabel.setText(cacheLabel)
                     val cacheIndex = voiceOptions.indexOf(cacheVoice)
                     if (cacheIndex >= 0) {
                         spinnerVoice.setSelection(cacheIndex)
@@ -305,13 +308,14 @@ class SpeakEngineDialog() : BaseDialogFragment(R.layout.dialog_recycler_view),
                             // 获取选中的选项并保存到缓存
                             val apiKey = mimoAPiKey.text.toString()
                             val style = voiceStyle.text.toString()
+                            val label = voiceLabel.text.toString()
                             val voice = spinnerVoice.selectedItem.toString()?:""
 
                             if (apiKey.isEmpty()){
                                 Toast.makeText(context, "还没输入ApiKey,没有就去申请一个限时免费", Toast.LENGTH_SHORT).show()
                                 return@setOnClickListener
                             }
-                            var selectedValue = apiKey+"@"+voice+"@"+style
+                            var selectedValue = apiKey+"@"+voice+"@"+style+"@"+label
                             saveToSharedPref(context, cacheKey, selectedValue)
                             Toast.makeText(context, "已选择：${selectedValue.take(20)}...", Toast.LENGTH_SHORT).show()
                             dialog.dismiss()

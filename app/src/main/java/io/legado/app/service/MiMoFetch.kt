@@ -51,6 +51,7 @@ class MiMoFetch(
         val curStyle = "$style，$pace"
 
         Log.i(TAG, "合成请求 → voice=$voice, style=$curStyle, text长度=${cleanedText.length}")
+        Log.i(TAG, "合成文字 → voice=$cleanedText")
         var isCust = voice =="自定义"
         val payload = JSONObject().apply {
 
@@ -105,8 +106,9 @@ class MiMoFetch(
 
     /** 移除特殊字符，保留中文、英文、常用标点 */
     private fun removeSpecialCharacters(text: String): String {
-        return text.replace(Regex("[^\\w\\s\u4e00-\u9fff，。！？；：、（）《》【】“”‘’]"), "")
+        return text.replace(Regex("[^\\w\\s\u4e00-\u9fff，。！？；：、()（）\\[\\]《》【】“”‘’]"), "")
     }
+
 
     /**
      * 把 rate（0~100）转换成自然语言语速描述
