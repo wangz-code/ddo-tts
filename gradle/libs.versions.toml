@@ -13,7 +13,7 @@ documentfile = "1.1.0"
 
 libarchive = "1.1.6"
 glide = "5.0.5"
-gson = "2.13.2"
+gson = "2.14.0"
 jsonPath = "2.10.0"
 jsoupxpath = "2.5.3"
 coroutines = "1.10.2"
